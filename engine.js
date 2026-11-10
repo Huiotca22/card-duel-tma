@@ -169,6 +169,7 @@ export class CardGameEngine {
       shieldGained: 0,
       hpHealed: 0,
       cardsDrawn: 0,
+      manaGained: 0,
       reflectedDamage: 0
     };
 
@@ -215,6 +216,11 @@ export class CardGameEngine {
     // 3. Чистый урон (игнорирует щит)
     if (card.trueDamage) {
       let finalTrueDmg = card.trueDamage;
+      // Казнь: если у цели <= 15 HP, чистый урон удваивается до 8
+      if (card.id === 'execute' && enemy.hp <= 15) {
+        finalTrueDmg *= 2;
+        this._log(`Казнь поражает раненую цель (HP <= 15)! Урон удвоен до ${finalTrueDmg}`);
+      }
       if (current.statusEffects.attackBuff > 0) {
         finalTrueDmg += current.statusEffects.attackBuff;
         current.statusEffects.attackBuff = 0;
@@ -250,6 +256,17 @@ export class CardGameEngine {
           effectSummary.cardsDrawn++;
         }
       }
+      this._log(`${current.name} берет ${effectSummary.cardsDrawn} карт(ы) из колоды`);
+    }
+
+    // 7. Восстановление маны
+    if (card.manaGain) {
+      const prevMana = current.mana;
+      current.mana = Math.min(current.maxMana, current.mana + card.manaGain);
+      const gained = current.mana - prevMana;
+      effectSummary.manaGained = gained;
+      this._log(`${current.name} восстанавливает ${gained} маны (текущая: ${current.mana}/${current.maxMana})`);
+      this._emit('manaGain', { target: playerKey, amount: gained, currentMana: current.mana });
     }
 
     // 7. Яд
@@ -348,6 +365,59 @@ export class CardGameEngine {
   }
 
   /**
+   * Начать ход для указанного игрока (или активного игрока).
+   * В поздней игре (maxMana >= 10) добирает 2 карты вместо 1 для динамичного топдека.
+   * @param {string} [playerKey=this.activePlayerKey]
+   * @returns {Object}
+   */
+  startTurn(playerKey = this.activePlayerKey) {
+    if (this.isGameOver) {
+      return { success: false, error: 'Игра уже завершена' };
+    }
+
+    const player = this.players[playerKey];
+
+    // 1. Прирост и восстановление маны (до максимума 10)
+    player.maxMana = Math.min(this.rules.MAX_MANA_CAP, player.maxMana + 1);
+    player.mana = player.maxMana;
+
+    // 2. Обработка периодического урона (Яд)
+    if (player.statusEffects.poison.turns > 0) {
+      const poisonDmg = player.statusEffects.poison.damagePerTurn;
+      player.hp = Math.max(0, player.hp - poisonDmg);
+      player.statusEffects.poison.turns--;
+
+      this._log(`${player.name} получает ${poisonDmg} урона от яда (осталось ходов: ${player.statusEffects.poison.turns})`);
+      this._emit('damage', { target: playerKey, amount: poisonDmg, isPoison: true });
+
+      if (this.checkGameOver()) {
+        return { success: true, isGameOver: true, winner: this.winner };
+      }
+    }
+
+    // 3. Добор карт в начале хода (при maxMana >= 10 берем 2 карты вместо 1)
+    const cardsToDraw = player.maxMana >= 10 ? 2 : this.rules.CARDS_DRAWN_PER_TURN;
+    for (let i = 0; i < cardsToDraw; i++) {
+      this._drawCard(playerKey);
+    }
+
+    this._log(`Ход игрока ${player.name}. Раунд: ${this.turn}, Мана: ${player.mana}/${player.maxMana}`);
+    this._emit('turnStart', {
+      player: playerKey,
+      turn: this.turn,
+      mana: player.mana,
+      maxMana: player.maxMana
+    });
+
+    return {
+      success: true,
+      activePlayer: playerKey,
+      turn: this.turn,
+      state: this.getState()
+    };
+  }
+
+  /**
    * Завершить текущий ход.
    */
   endTurn() {
@@ -362,50 +432,13 @@ export class CardGameEngine {
     this._log(`${this.players[endedPlayerKey].name} завершает ход`);
 
     this.activePlayerKey = nextPlayerKey;
-    const nextPlayer = this.players[nextPlayerKey];
 
     // Если ход вернулся к первому игроку — увеличиваем общий счетчик раунда
     if (nextPlayerKey === 'player') {
       this.turn++;
     }
 
-    // 1. Прирост и восстановление маны (до максимума 10)
-    nextPlayer.maxMana = Math.min(this.rules.MAX_MANA_CAP, nextPlayer.maxMana + 1);
-    nextPlayer.mana = nextPlayer.maxMana;
-
-    // 2. Обработка периодического урона (Яд)
-    if (nextPlayer.statusEffects.poison.turns > 0) {
-      const poisonDmg = nextPlayer.statusEffects.poison.damagePerTurn;
-      nextPlayer.hp = Math.max(0, nextPlayer.hp - poisonDmg);
-      nextPlayer.statusEffects.poison.turns--;
-
-      this._log(`${nextPlayer.name} получает ${poisonDmg} урона от яда (осталось ходов: ${nextPlayer.statusEffects.poison.turns})`);
-      this._emit('damage', { target: nextPlayerKey, amount: poisonDmg, isPoison: true });
-
-      if (this.checkGameOver()) {
-        return { success: true, isGameOver: true, winner: this.winner };
-      }
-    }
-
-    // 3. Добор карты в начале хода
-    for (let i = 0; i < this.rules.CARDS_DRAWN_PER_TURN; i++) {
-      this._drawCard(nextPlayerKey);
-    }
-
-    this._log(`Ход игрока ${nextPlayer.name}. Раунд: ${this.turn}, Мана: ${nextPlayer.mana}/${nextPlayer.maxMana}`);
-    this._emit('turnStart', {
-      player: nextPlayerKey,
-      turn: this.turn,
-      mana: nextPlayer.mana,
-      maxMana: nextPlayer.maxMana
-    });
-
-    return {
-      success: true,
-      activePlayer: nextPlayerKey,
-      turn: this.turn,
-      state: this.getState()
-    };
+    return this.startTurn(nextPlayerKey);
   }
 
   /**
@@ -477,20 +510,50 @@ export class CardGameEngine {
       }
 
       // 1. Проверяем, есть ли летал (карта, которая добьет врага прямо сейчас)
-      const lethalCard = playable.find(item => {
-        if (item.card.trueDamage && item.card.trueDamage >= enemy.hp) return true;
-        if (item.card.damage && item.card.damage >= (enemy.hp + enemy.shield)) return true;
-        return false;
-      });
+      // Если enemy HP <= 8 и у бота есть execute, это гарантированный летал!
+      let lethalCard = null;
+      if (enemy.hp <= 8) {
+        lethalCard = playable.find(item => item.card.id === 'execute');
+      }
+
+      if (!lethalCard) {
+        lethalCard = playable.find(item => {
+          let trueDmg = item.card.trueDamage || 0;
+          if (item.card.id === 'execute' && enemy.hp <= 15) {
+            trueDmg = 8;
+          }
+          if (bot.statusEffects.attackBuff > 0 && trueDmg > 0) {
+            trueDmg += bot.statusEffects.attackBuff;
+          }
+          if (trueDmg >= enemy.hp) return true;
+
+          let dmg = item.card.damage || 0;
+          if (bot.statusEffects.attackBuff > 0 && dmg > 0) {
+            dmg += bot.statusEffects.attackBuff;
+          }
+          if (dmg >= (enemy.hp + enemy.shield)) return true;
+
+          return false;
+        });
+      }
 
       let chosen = lethalCard;
 
-      // 2. Если мало HP (< 12), ищем лечение или щит
+      // 2. Если рука истощена (hand size < 3) и есть карта с draw, приоритизируем добор для наполнения руки
+      if (!chosen && bot.hand.length < 3) {
+        const drawCards = playable.filter(item => item.card.draw && item.card.draw > 0);
+        if (drawCards.length > 0) {
+          drawCards.sort((a, b) => (b.card.draw || 0) - (a.card.draw || 0));
+          chosen = drawCards[0];
+        }
+      }
+
+      // 3. Если мало HP (< 12), ищем лечение или щит
       if (!chosen && bot.hp < 12) {
         chosen = playable.find(item => item.card.heal || item.card.shield || item.card.conditional);
       }
 
-      // 3. Если есть бафф "Боевой раж" и есть в руке атака, разыгрываем сначала бафф
+      // 4. Если есть бафф "Боевой раж" и есть в руке атака, разыгрываем сначала бафф
       if (!chosen) {
         const hasAttack = playable.some(item => item.card.damage || item.card.trueDamage);
         if (hasAttack) {
@@ -498,7 +561,7 @@ export class CardGameEngine {
         }
       }
 
-      // 4. Иначе берем самую дорогую доступную карту (максимальный темп/урон)
+      // 5. Иначе берем самую дорогую доступную карту (максимальный темп/урон)
       if (!chosen) {
         playable.sort((a, b) => b.card.cost - a.card.cost);
         chosen = playable[0];

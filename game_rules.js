@@ -17,7 +17,8 @@ export const CARD_TYPES = {
   ATTACK: 'attack',
   DEFENSE: 'defense',
   HEAL: 'heal',
-  SPECIAL: 'special'
+  SPECIAL: 'special',
+  SPELL: 'spell'
 };
 
 export const CARDS = [
@@ -147,6 +148,31 @@ export const CARDS = [
       defaultShield: 5
     },
     description: 'Восстанавливает 5 здоровья и 5 щита. Если здоровье ниже 15, восстанавливает 10 здоровья и 4 щита.'
+  },
+  {
+    id: 'tome',
+    name: 'Фолиант мудрости',
+    type: CARD_TYPES.SPELL,
+    cost: 3,
+    draw: 2,
+    description: 'Берет 2 дополнительные карты из колоды.'
+  },
+  {
+    id: 'execute',
+    name: 'Казнь',
+    type: CARD_TYPES.ATTACK,
+    cost: 2,
+    trueDamage: 4,
+    description: 'Наносит 4 чистого урона. Если у цели <= 15 HP, урон удваивается до 8.'
+  },
+  {
+    id: 'surge',
+    name: 'Всплеск маны',
+    type: CARD_TYPES.SPELL,
+    cost: 1,
+    manaGain: 2,
+    draw: 1,
+    description: 'Восстанавливает 2 маны и берет 1 карту из колоды.'
   }
 ];
 
@@ -156,7 +182,7 @@ export const CARD_MAP = CARDS.reduce((acc, card) => {
 }, {});
 
 /**
- * Создает сбалансированную колоду по умолчанию (24 карты).
+ * Создает сбалансированную колоду по умолчанию (27 карт).
  */
 export function createDefaultDeck() {
   const distribution = [
@@ -173,7 +199,10 @@ export function createDefaultDeck() {
     { id: 'mirror_shield', count: 1 },
     { id: 'fury', count: 1 },
     { id: 'second_wind', count: 1 },
-    { id: 'meteor', count: 1 }
+    { id: 'meteor', count: 1 },
+    { id: 'tome', count: 1 },
+    { id: 'execute', count: 1 },
+    { id: 'surge', count: 1 }
   ];
 
   const deck = [];

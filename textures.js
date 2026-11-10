@@ -1102,6 +1102,339 @@ const ART_DRAWERS = {
     _drawSparkle(ctx, 15, -13, 2, '#ffffff');
 
     ctx.restore();
+  },
+
+  // 15. Фолиант мудрости: древний гримуар с парящими рунами и золотым обрезом
+  tome(ctx) {
+    ctx.save();
+
+    // 1. Магическое свечение тайных знаний (сапфирово-фиолетовый ореол)
+    const aura = ctx.createRadialGradient(0, 0, 3, 0, 0, 19);
+    aura.addColorStop(0, 'rgba(120, 110, 255, 0.55)');
+    aura.addColorStop(0.5, 'rgba(70, 40, 200, 0.25)');
+    aura.addColorStop(1, 'rgba(20, 10, 60, 0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.arc(0, 0, 19, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Раскрытый переплет из темной кожи с золотым тиснением
+    ctx.fillStyle = '#1c1236';
+    ctx.beginPath();
+    ctx.moveTo(-16, -12);
+    ctx.lineTo(16, -12);
+    ctx.lineTo(17, 13);
+    ctx.lineTo(-17, 13);
+    ctx.closePath();
+    ctx.fill();
+
+    // Золотой обрез страниц снизу и сверху
+    ctx.fillStyle = '#d4af37';
+    ctx.fillRect(-15, 11, 30, 2);
+
+    // 3. Страницы (левая и правая сторона разворота)
+    // Левая страница
+    const leftPageGrad = ctx.createLinearGradient(-15, 0, 0, 0);
+    leftPageGrad.addColorStop(0, '#e8dcba');
+    leftPageGrad.addColorStop(1, '#f7f2e4');
+    ctx.fillStyle = leftPageGrad;
+    ctx.beginPath();
+    ctx.moveTo(-14, -10);
+    ctx.quadraticCurveTo(-7, -12, -1, -9);
+    ctx.lineTo(-1, 10);
+    ctx.quadraticCurveTo(-7, 7, -14, 9);
+    ctx.closePath();
+    ctx.fill();
+
+    // Правая страница
+    const rightPageGrad = ctx.createLinearGradient(0, 0, 15, 0);
+    rightPageGrad.addColorStop(0, '#f7f2e4');
+    rightPageGrad.addColorStop(1, '#e8dcba');
+    ctx.fillStyle = rightPageGrad;
+    ctx.beginPath();
+    ctx.moveTo(1, -9);
+    ctx.quadraticCurveTo(7, -12, 14, -10);
+    ctx.lineTo(14, 9);
+    ctx.quadraticCurveTo(7, 7, 1, 10);
+    ctx.closePath();
+    ctx.fill();
+
+    // Тень в корешке книги
+    ctx.fillStyle = 'rgba(40, 20, 70, 0.45)';
+    ctx.fillRect(-1.5, -10, 3, 21);
+
+    // Рунические строки древнего текста на страницах
+    ctx.strokeStyle = 'rgba(90, 70, 140, 0.7)';
+    ctx.lineWidth = 1;
+    // Левые строки
+    ctx.beginPath();
+    ctx.moveTo(-12, -6);
+    ctx.lineTo(-3, -5);
+    ctx.moveTo(-12, -2);
+    ctx.lineTo(-4, -1);
+    ctx.moveTo(-12, 2);
+    ctx.lineTo(-3, 3);
+    ctx.moveTo(-11, 6);
+    ctx.lineTo(-5, 7);
+    // Правые строки
+    ctx.moveTo(3, -5);
+    ctx.lineTo(12, -6);
+    ctx.moveTo(4, -1);
+    ctx.lineTo(12, -2);
+    ctx.moveTo(3, 3);
+    ctx.lineTo(12, 2);
+    ctx.moveTo(5, 7);
+    ctx.lineTo(11, 6);
+    ctx.stroke();
+
+    // 4. Парящее магическое око / руна мудрости в центре
+    ctx.save();
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(0, -1, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#5e5ce6';
+    ctx.beginPath();
+    ctx.arc(0, -1, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-0.6, -1.6, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 5. Атласная алая закладка-лента (ляссе)
+    ctx.strokeStyle = '#e63946';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.quadraticCurveTo(3, 5, 2, 16);
+    ctx.stroke();
+
+    // Золотая кисточка на конце закладки
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(2, 16, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 6. Искры магической мудрости
+    _drawSparkle(ctx, -13, -13, 2.5, '#70d6ff');
+    _drawSparkle(ctx, 13, -12, 2.5, '#ffd700');
+    _drawSparkle(ctx, 0, -14, 3, '#ffffff');
+    _drawSparkle(ctx, 10, 13, 1.8, '#a29bfe');
+
+    ctx.restore();
+  },
+
+  // 16. Казнь: тяжелый топор палача, обагренный кровью, раскалывающий броню
+  execute(ctx) {
+    ctx.save();
+
+    // 1. Кровавый ореол смертельного удара (багрово-черная вспышка)
+    const bloodAura = ctx.createRadialGradient(0, 0, 2, 0, 0, 19);
+    bloodAura.addColorStop(0, 'rgba(255, 30, 30, 0.6)');
+    bloodAura.addColorStop(0.5, 'rgba(140, 10, 20, 0.3)');
+    bloodAura.addColorStop(1, 'rgba(30, 5, 10, 0)');
+    ctx.fillStyle = bloodAura;
+    ctx.beginPath();
+    ctx.arc(0, 0, 19, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Рассекающая диагональная линия чистого урона
+    ctx.strokeStyle = 'rgba(255, 60, 60, 0.4)';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-18, 16);
+    ctx.lineTo(16, -18);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-16, 14);
+    ctx.lineTo(14, -16);
+    ctx.stroke();
+
+    // 3. Топор палача (повернут под углом)
+    ctx.save();
+    ctx.rotate(-Math.PI / 6);
+
+    // Древко топора из темного мореного дуба
+    ctx.fillStyle = '#3a2012';
+    ctx.fillRect(-2, -18, 4, 34);
+
+    // Стальные заклепки и железная оковка древка
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(-2.5, -12, 5, 2);
+    ctx.fillRect(-2.5, 6, 5, 2);
+
+    // Массивное стальное лезвие палаческого топора
+    const bladeGrad = ctx.createLinearGradient(-15, -16, 5, 4);
+    bladeGrad.addColorStop(0, '#374151');
+    bladeGrad.addColorStop(0.5, '#4b5563');
+    bladeGrad.addColorStop(1, '#9ca3af');
+    ctx.fillStyle = bladeGrad;
+
+    ctx.beginPath();
+    ctx.moveTo(2, -14);
+    ctx.lineTo(14, -18);
+    ctx.quadraticCurveTo(17, -5, 14, 6);
+    ctx.lineTo(2, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Острая режущая кромка лезвия
+    ctx.strokeStyle = '#f3f4f6';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(14, -18);
+    ctx.quadraticCurveTo(17, -5, 14, 6);
+    ctx.stroke();
+
+    // Кровавый след на кромке (чистый урон)
+    ctx.strokeStyle = '#ff1744';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(14, -12);
+    ctx.quadraticCurveTo(16.5, -4, 14, 4);
+    ctx.stroke();
+
+    // Шип / обух с обратной стороны
+    ctx.fillStyle = '#374151';
+    ctx.beginPath();
+    ctx.moveTo(-2, -10);
+    ctx.lineTo(-9, -7);
+    ctx.lineTo(-2, -4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Навершие древка с железным шипом
+    ctx.fillStyle = '#9ca3af';
+    ctx.beginPath();
+    ctx.moveTo(0, 16);
+    ctx.lineTo(3, 19);
+    ctx.lineTo(-3, 19);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+
+    // 4. Капли крови и искры казни
+    ctx.fillStyle = '#ff1744';
+    ctx.beginPath();
+    ctx.arc(8, 11, 1.6, 0, Math.PI * 2);
+    ctx.arc(12, 14, 1.2, 0, Math.PI * 2);
+    ctx.arc(-8, -12, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    _drawSparkle(ctx, -12, 10, 3, '#ffffff');
+    _drawSparkle(ctx, 13, -11, 3.5, '#ff5252');
+    _drawSparkle(ctx, 4, -15, 2, '#ff1744');
+
+    ctx.restore();
+  },
+
+  // 17. Всплеск маны: взрывной вихрь чистой арканы и молний
+  surge(ctx) {
+    ctx.save();
+
+    // 1. Радиальный всплеск маны (бирюзово-электрический вихрь)
+    const surgeGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 19);
+    surgeGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    surgeGrad.addColorStop(0.3, 'rgba(0, 229, 255, 0.7)');
+    surgeGrad.addColorStop(0.7, 'rgba(41, 121, 255, 0.35)');
+    surgeGrad.addColorStop(1, 'rgba(100, 0, 255, 0)');
+    ctx.fillStyle = surgeGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 19, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Внешнее пульсирующее кольцо маны
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 3. Дуги разрядов чистой маны (молнии)
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Верхний разряд
+    ctx.beginPath();
+    ctx.moveTo(0, -3);
+    ctx.lineTo(-4, -8);
+    ctx.lineTo(2, -11);
+    ctx.lineTo(-1, -16);
+    ctx.stroke();
+
+    // Нижний разряд
+    ctx.beginPath();
+    ctx.moveTo(1, 3);
+    ctx.lineTo(5, 7);
+    ctx.lineTo(-2, 11);
+    ctx.lineTo(3, 16);
+    ctx.stroke();
+
+    // Левый разряд
+    ctx.beginPath();
+    ctx.moveTo(-3, 0);
+    ctx.lineTo(-8, 3);
+    ctx.lineTo(-11, -3);
+    ctx.lineTo(-16, 1);
+    ctx.stroke();
+
+    // Правый разряд
+    ctx.beginPath();
+    ctx.moveTo(3, -1);
+    ctx.lineTo(7, -4);
+    ctx.lineTo(11, 2);
+    ctx.lineTo(16, -2);
+    ctx.stroke();
+
+    // 4. Центральный сверкающий кристалл маны
+    // Внутреннее сияние
+    ctx.fillStyle = '#00b0ff';
+    ctx.beginPath();
+    ctx.moveTo(0, -9);
+    ctx.lineTo(7, 0);
+    ctx.lineTo(0, 9);
+    ctx.lineTo(-7, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Светлая грань
+    ctx.fillStyle = '#e0f7fa';
+    ctx.beginPath();
+    ctx.moveTo(0, -9);
+    ctx.lineTo(7, 0);
+    ctx.lineTo(0, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Ядро белого каления
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(0, -5);
+    ctx.lineTo(4, 0);
+    ctx.lineTo(0, 5);
+    ctx.lineTo(-4, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // 5. Искры выплеска энергии
+    _drawSparkle(ctx, -10, -11, 3, '#ffffff');
+    _drawSparkle(ctx, 11, 10, 3, '#00e5ff');
+    _drawSparkle(ctx, 12, -9, 2.5, '#76ff03');
+    _drawSparkle(ctx, -11, 11, 2.2, '#00e5ff');
+
+    ctx.restore();
   }
 };
 
@@ -1115,14 +1448,16 @@ const ART_DRAWERS = {
  * @param {string} cardId ID карты (strike, fireball, etc.)
  * @param {number} cx Центр X
  * @param {number} cy Центр Y
- * @param {number} size Желаемый габаритный размер арта в пикселях
+ * @param {number} [w=38] Желаемая ширина или размер арта в пикселях
+ * @param {number} [h=null] Желаемая высота арта (если не указана, равна w)
  */
-export function drawCardArt(ctx, cardId, cx, cy, size = 38) {
+export function drawCardArt(ctx, cardId, cx, cy, w = 38, h = null) {
   const drawer = ART_DRAWERS[cardId] || ART_DRAWERS.strike;
   ctx.save();
   ctx.translate(cx, cy);
-  const scale = size / 40;
-  ctx.scale(scale, scale);
+  const scaleX = w / 40;
+  const scaleY = (h != null ? h : w) / 40;
+  ctx.scale(scaleX, scaleY);
   drawer(ctx);
   ctx.restore();
 }
@@ -1412,7 +1747,10 @@ export const CARD_TEXTURES = {
   piercing_strike: { id: 'piercing_strike', name: 'Бронебойный выпад' },
   mirror_shield: { id: 'mirror_shield', name: 'Зеркальный щит' },
   second_wind: { id: 'second_wind', name: 'Второе дыхание' },
-  meteor: { id: 'meteor', name: 'Метеорит' }
+  meteor: { id: 'meteor', name: 'Метеорит' },
+  tome: { id: 'tome', name: 'Фолиант мудрости' },
+  execute: { id: 'execute', name: 'Казнь' },
+  surge: { id: 'surge', name: 'Всплеск маны' }
 };
 
 // Экспорт глобально для совместимости с любыми видами сборщиков / script-тегов

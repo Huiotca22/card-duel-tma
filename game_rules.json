@@ -12,7 +12,8 @@
     "ATTACK": "attack",
     "DEFENSE": "defense",
     "HEAL": "heal",
-    "SPECIAL": "special"
+    "SPECIAL": "special",
+    "SPELL": "spell"
   },
   "cards": [
     {
@@ -141,6 +142,31 @@
         "defaultShield": 5
       },
       "description": "Восстанавливает 5 здоровья и 5 щита. Если здоровье ниже 15, восстанавливает 10 здоровья и 4 щита."
+    },
+    {
+      "id": "tome",
+      "name": "Фолиант мудрости",
+      "type": "spell",
+      "cost": 3,
+      "draw": 2,
+      "description": "Берет 2 дополнительные карты из колоды."
+    },
+    {
+      "id": "execute",
+      "name": "Казнь",
+      "type": "attack",
+      "cost": 2,
+      "trueDamage": 4,
+      "description": "Наносит 4 чистого урона. Если у цели <= 15 HP, урон удваивается до 8."
+    },
+    {
+      "id": "surge",
+      "name": "Всплеск маны",
+      "type": "spell",
+      "cost": 1,
+      "manaGain": 2,
+      "draw": 1,
+      "description": "Восстанавливает 2 маны и берет 1 карту из колоды."
     }
   ]
 }

@@ -789,6 +789,12 @@ export class CanvasRenderer {
         gradEnd: '#501070',
         border: '#bf5af2',
         badge: 'МАГИЯ'
+      },
+      [CARD_TYPES.SPELL]: {
+        gradStart: '#5856d6',
+        gradEnd: '#1e1a5a',
+        border: '#7a79e0',
+        badge: 'ЧАРЫ'
       }
     };
 
@@ -950,6 +956,12 @@ export class CanvasRenderer {
     } else if (card.shield) {
       label = `🛡️ +${card.shield} ЩИТ`;
       pillColor = '#0a84ff';
+    } else if (card.manaGain) {
+      label = `⚡ +${card.manaGain} МАНА`;
+      pillColor = '#5856d6';
+    } else if (card.draw) {
+      label = `📜 +${card.draw} КАРТЫ`;
+      pillColor = '#5856d6';
     } else if (card.heal) {
       label = `💚 +${card.heal} ХП`;
       pillColor = '#30d158';
