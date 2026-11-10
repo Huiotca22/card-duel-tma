@@ -85,6 +85,65 @@ html, body {
   background: rgba(45, 50, 75, 0.9);
 }
 
+/* Бейдж статистики и побед в HUD */
+.stats-badge {
+  background: rgba(28, 31, 46, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--panel-border);
+  color: #ffffff;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: default;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stats-badge .badge-icon {
+  font-size: 14px;
+}
+
+.streak-badge {
+  color: #ff9500;
+  background: rgba(255, 149, 0, 0.15);
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+.game-over-stats {
+  background: rgba(15, 18, 28, 0.7);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  text-align: center;
+  color: #e5e7eb;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #ffd60a;
+}
+
 /* Всплывающий тост */
 .toast {
   position: absolute;

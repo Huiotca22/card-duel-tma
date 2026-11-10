@@ -19,18 +19,65 @@ export class ParticleSystem {
   spawnFloatingText(text, x, y, options = {}) {
     this.floatingTexts.push({
       text,
-      x: x + (Math.random() * 20 - 10),
+      x: x + (Math.random() * 24 - 12),
       y,
-      vx: (Math.random() - 0.5) * 1.5,
-      vy: options.vy || -2.4,
+      vx: (Math.random() - 0.5) * 1.8,
+      vy: options.vy || (options.isCrit ? -3.2 : -2.4),
       color: options.color || '#ffffff',
       fontSize: options.fontSize || 22,
-      fontWeight: options.fontWeight || 'bold',
+      fontWeight: options.fontWeight || '800',
       alpha: 1.0,
       life: 1.0,
-      decay: options.decay || 0.016,
-      scale: options.scale || 1.3
+      decay: options.decay || (options.isCrit ? 0.012 : 0.018),
+      scale: options.scale || (options.isCrit ? 1.6 : 1.3),
+      isCrit: !!options.isCrit,
+      glowColor: options.glowColor || null
     });
+  }
+
+  // Специализированный спавн цифр урона и боевых эффектов
+  spawnDamageNumber(amount, x, y, type = 'normal') {
+    if (type === 'crit' || (type === 'normal' && amount >= 8)) {
+      this.spawnFloatingText(`💥 -${amount} КРИТ!`, x, y, {
+        color: '#ffd60a',
+        glowColor: '#ff9500',
+        fontSize: 26,
+        isCrit: true,
+        scale: 1.8
+      });
+      this.spawnFireBurst(x, y, 22);
+      this.addTrauma(0.5);
+    } else if (type === 'trueDamage') {
+      this.spawnFloatingText(`⚡ -${amount} ЧИСТЫЙ!`, x, y, {
+        color: '#bf5af2',
+        glowColor: '#af52de',
+        fontSize: 24,
+        scale: 1.5
+      });
+      this.addTrauma(0.4);
+    } else if (type === 'poison') {
+      this.spawnFloatingText(`🧪 -${amount}`, x, y, {
+        color: '#30d158',
+        fontSize: 22,
+        scale: 1.3
+      });
+      this.spawnPoisonMist(x, y);
+    } else if (type === 'reflect') {
+      this.spawnFloatingText(`🪞 -${amount}`, x, y, {
+        color: '#ff2d55',
+        fontSize: 22,
+        scale: 1.4
+      });
+      this.addTrauma(0.35);
+    } else {
+      this.spawnFloatingText(`-${amount}`, x, y, {
+        color: '#ff3b30',
+        fontSize: 24,
+        scale: 1.35
+      });
+      this.spawnFireBurst(x, y, 12);
+      this.addTrauma(Math.min(0.6, amount * 0.05));
+    }
   }
 
   // Частицы огня / взрыва
@@ -210,13 +257,21 @@ export class ParticleSystem {
     ctx.save();
     for (const t of this.floatingTexts) {
       ctx.globalAlpha = Math.max(0, t.alpha);
-      ctx.font = `${t.fontWeight} ${Math.round(t.fontSize * t.scale)}px 'SF Pro Display', -apple-system, system-ui, sans-serif`;
+      const currentFontSize = Math.round(t.fontSize * t.scale);
+      ctx.font = `${t.fontWeight} ${currentFontSize}px 'SF Pro Display', -apple-system, system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Тень / обводка для контраста
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.lineWidth = 4;
+      if (t.glowColor) {
+        ctx.shadowColor = t.glowColor;
+        ctx.shadowBlur = 12;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      // Тень / обводка для максимального контраста
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.92)';
+      ctx.lineWidth = t.isCrit ? 6 : 4;
       ctx.strokeText(t.text, t.x, t.y);
 
       ctx.fillStyle = t.color;

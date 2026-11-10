@@ -12,6 +12,11 @@
   <div id="app-container">
     <!-- Верхняя панель быстрого доступа -->
     <div class="top-hud">
+      <div id="statsBadge" class="stats-badge" title="Статистика побед">
+        <span class="badge-icon">🏆</span>
+        <span id="winCount">0</span>
+        <span id="streakBadge" class="streak-badge">🔥0</span>
+      </div>
       <button id="toggleSoundBtn" class="hud-btn" title="Звук" aria-label="Звук">🔊</button>
       <button id="toggleLogBtn" class="hud-btn" title="Журнал боя" aria-label="Журнал боя">📜</button>
       <button id="openRulesBtn" class="hud-btn" title="Правила" aria-label="Правила">❓</button>
@@ -56,6 +61,7 @@
       <div class="modal-card">
         <h2 id="gameOverTitle" class="modal-title">ИТОГ МАТЧА</h2>
         <p id="gameOverDesc" class="modal-desc"></p>
+        <div id="gameOverStats" class="game-over-stats"></div>
         <button id="restartMatchBtn" class="btn-primary">Сыграть снова</button>
       </div>
     </div>

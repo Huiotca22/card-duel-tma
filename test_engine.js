@@ -120,7 +120,7 @@ function runTests() {
   console.log('\n--- Тест симуляции матча ИИ против ИИ ---');
   const simGame = new CardGameEngine({ playerName: 'Бот 1', opponentName: 'Бот 2' });
   let roundsCount = 0;
-  while (!simGame.isGameOver && roundsCount < 80) {
+  while (!simGame.isGameOver && roundsCount < 150) {
     simGame.makeBotMove();
     roundsCount++;
   }

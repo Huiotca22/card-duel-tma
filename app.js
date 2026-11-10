@@ -8,6 +8,56 @@ import { ParticleSystem } from './particles.js';
 import { CanvasRenderer } from './canvas_renderer.js';
 import { sound } from './audio.js';
 
+const STATS_STORAGE_KEY = 'card_duel_stats_v1';
+
+class StatsManager {
+  constructor() {
+    this.stats = this.load();
+  }
+
+  load() {
+    try {
+      const data = localStorage.getItem(STATS_STORAGE_KEY);
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch (e) {
+      console.warn('localStorage load error:', e);
+    }
+    return {
+      wins: 0,
+      losses: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      totalMatches: 0
+    };
+  }
+
+  save() {
+    try {
+      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(this.stats));
+    } catch (e) {
+      console.warn('localStorage save error:', e);
+    }
+  }
+
+  recordMatch(winner) {
+    this.stats.totalMatches = (this.stats.totalMatches || 0) + 1;
+    if (winner === 'player') {
+      this.stats.wins = (this.stats.wins || 0) + 1;
+      this.stats.currentStreak = (this.stats.currentStreak || 0) + 1;
+      if (this.stats.currentStreak > (this.stats.bestStreak || 0)) {
+        this.stats.bestStreak = this.stats.currentStreak;
+      }
+    } else if (winner === 'opponent') {
+      this.stats.losses = (this.stats.losses || 0) + 1;
+      this.stats.currentStreak = 0;
+    }
+    this.save();
+    return this.stats;
+  }
+}
+
 class DuelApp {
   constructor() {
     this.tg = window.Telegram?.WebApp || null;
@@ -15,6 +65,7 @@ class DuelApp {
     this.particles = new ParticleSystem();
     this.renderer = new CanvasRenderer(this.canvas, this.particles);
     this.engine = null;
+    this.statsManager = new StatsManager();
 
     this.isBotThinking = false;
     this.pointerStartPos = { x: 0, y: 0 };
@@ -23,6 +74,8 @@ class DuelApp {
 
     // UI элементы DOM
     this.ui = {
+      winCount: document.getElementById('winCount'),
+      streakBadge: document.getElementById('streakBadge'),
       logDrawer: document.getElementById('logDrawer'),
       logList: document.getElementById('logList'),
       toggleLogBtn: document.getElementById('toggleLogBtn'),
@@ -34,12 +87,14 @@ class DuelApp {
       gameOverModal: document.getElementById('gameOverModal'),
       gameOverTitle: document.getElementById('gameOverTitle'),
       gameOverDesc: document.getElementById('gameOverDesc'),
+      gameOverStats: document.getElementById('gameOverStats'),
       restartMatchBtn: document.getElementById('restartMatchBtn'),
       toast: document.getElementById('toast')
     };
 
     this._initTelegram();
     this._initEventListeners();
+    this._updateStatsUI();
     this.startNewMatch();
     this._startLoop();
   }
@@ -74,6 +129,17 @@ class DuelApp {
           this.tg.HapticFeedback.notificationOccurred(type);
         }
       } catch (e) {}
+    }
+  }
+
+  _updateStatsUI() {
+    const s = this.statsManager.stats;
+    if (this.ui.winCount) {
+      this.ui.winCount.textContent = s.wins;
+    }
+    if (this.ui.streakBadge) {
+      this.ui.streakBadge.textContent = `🔥${s.currentStreak}`;
+      this.ui.streakBadge.style.display = s.currentStreak > 0 ? 'inline-block' : 'none';
     }
   }
 
@@ -134,63 +200,49 @@ class DuelApp {
 
     e.on('damage', ({ target, amount, isReflect, isPoison, isTrueDamage }) => {
       const isTargetOpponent = target === 'opponent';
-      const x = this.renderer.width / 2;
-      const y = isTargetOpponent ? 70 : this.renderer.height - 180;
+      // Точный расчет координат относительно аватара и шкалы HP
+      const x = isTargetOpponent ? (this.renderer.width * 0.42) : (this.renderer.width * 0.42);
+      const y = isTargetOpponent ? 50 : (this.renderer.height - 215);
 
-      if (isTrueDamage) {
-        this.particles.spawnFloatingText(`-${amount} ЧИСТЫЙ!`, x, y, {
-          color: '#bf5af2',
-          fontSize: 24
-        });
-        this.particles.addTrauma(0.4);
-      } else if (isReflect) {
-        this.particles.spawnFloatingText(`🪞 -${amount}`, x, y, {
-          color: '#bf5af2',
-          fontSize: 22
-        });
-        this.particles.addTrauma(0.3);
-      } else if (isPoison) {
-        this.particles.spawnFloatingText(`🧪 -${amount}`, x, y, {
-          color: '#30d158',
-          fontSize: 20
-        });
-        this.particles.spawnPoisonMist(x, y);
-      } else {
-        this.particles.spawnFloatingText(`-${amount}`, x, y, {
-          color: '#ff3b30',
-          fontSize: 24
-        });
-        if (amount >= 10) {
-          this.particles.spawnMeteorImpact(x, y);
-        } else {
-          this.particles.spawnFireBurst(x, y, 18);
-        }
-        this.particles.addTrauma(Math.min(0.7, amount * 0.05));
+      let damageType = 'normal';
+      if (isTrueDamage) damageType = 'trueDamage';
+      else if (isReflect) damageType = 'reflect';
+      else if (isPoison) damageType = 'poison';
+      else if (amount >= 8) damageType = 'crit';
+
+      this.particles.spawnDamageNumber(amount, x, y, damageType);
+
+      if (amount >= 10) {
+        this.particles.spawnMeteorImpact(x, y);
       }
 
-      this._haptic('heavy');
+      this._haptic(amount >= 8 ? 'heavy' : 'medium');
     });
 
     e.on('shield', ({ target, amount }) => {
       const isTargetOpponent = target === 'opponent';
-      const x = this.renderer.width / 2;
-      const y = isTargetOpponent ? 70 : this.renderer.height - 180;
+      const x = isTargetOpponent ? (this.renderer.width * 0.5) : (this.renderer.width * 0.5);
+      const y = isTargetOpponent ? 50 : (this.renderer.height - 215);
 
-      this.particles.spawnFloatingText(`+${amount} ЩИТ`, x, y, {
+      this.particles.spawnFloatingText(`🛡️ +${amount} ЩИТ`, x, y, {
         color: '#0a84ff',
-        fontSize: 22
+        glowColor: '#5856d6',
+        fontSize: 22,
+        scale: 1.4
       });
       this.particles.spawnShieldBurst(x, y);
     });
 
     e.on('heal', ({ target, amount }) => {
       const isTargetOpponent = target === 'opponent';
-      const x = this.renderer.width / 2;
-      const y = isTargetOpponent ? 70 : this.renderer.height - 180;
+      const x = isTargetOpponent ? (this.renderer.width * 0.5) : (this.renderer.width * 0.5);
+      const y = isTargetOpponent ? 50 : (this.renderer.height - 215);
 
-      this.particles.spawnFloatingText(`+${amount} HP`, x, y, {
+      this.particles.spawnFloatingText(`💚 +${amount} HP`, x, y, {
         color: '#34c759',
-        fontSize: 22
+        glowColor: '#30d158',
+        fontSize: 22,
+        scale: 1.4
       });
       this.particles.spawnHealSparkles(x, y);
     });
@@ -204,12 +256,38 @@ class DuelApp {
 
     e.on('gameOver', ({ winner }) => {
       setTimeout(() => {
+        const s = this.statsManager.recordMatch(winner);
+        this._updateStatsUI();
+
+        if (this.ui.gameOverStats) {
+          this.ui.gameOverStats.innerHTML = `
+            <div class="stat-row">
+              <span class="stat-label">Всего дуэлей</span>
+              <span class="stat-value">${s.totalMatches}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Побед / Поражений</span>
+              <span class="stat-value">${s.wins} / ${s.losses}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Текущая серия</span>
+              <span class="stat-value">🔥 ${s.currentStreak}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Лучшая серия</span>
+              <span class="stat-value">🏆 ${s.bestStreak}</span>
+            </div>
+          `;
+        }
+
         if (winner === 'player') {
           sound.playVictory();
           this._haptic('success');
           this.ui.gameOverTitle.textContent = '🏆 ПОБЕДА!';
           this.ui.gameOverTitle.style.color = '#34c759';
-          this.ui.gameOverDesc.textContent = 'Ты сокрушил соперника в честном поединке!';
+          this.ui.gameOverDesc.textContent = s.currentStreak >= 3 
+            ? `Невероятно! Серия из ${s.currentStreak} побед подряд! 🔥` 
+            : 'Ты сокрушил соперника в честном поединке!';
         } else if (winner === 'opponent') {
           sound.playDefeat();
           this._haptic('error');
