@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Карточная Дуэль TMA</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div id="app-container">
+    <!-- Верхняя панель быстрого доступа -->
+    <div class="top-hud">
+      <button id="toggleSoundBtn" class="hud-btn" title="Звук" aria-label="Звук">🔊</button>
+      <button id="toggleLogBtn" class="hud-btn" title="Журнал боя" aria-label="Журнал боя">📜</button>
+      <button id="openRulesBtn" class="hud-btn" title="Правила" aria-label="Правила">❓</button>
+    </div>
+
+    <!-- Всплывающий тост с подсказками -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Основной Canvas для отрисовки дуэли -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Выдвижной журнал боя -->
+    <div id="logDrawer" class="log-drawer hidden">
+      <div class="drawer-header">
+        <h3>📜 Журнал боя</h3>
+        <button id="closeLogBtn" class="close-btn">&times;</button>
+      </div>
+      <ul id="logList" class="log-list"></ul>
+    </div>
+
+    <!-- Модальное окно правил игры -->
+    <div id="rulesModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2 class="modal-title">⚔️ Правила дуэли</h2>
+        <div class="rules-content">
+          <p><strong>Цель:</strong> Снизить здоровье оппонента с 30 до 0.</p>
+          <h4>Ресурсы:</h4>
+          <p>• <strong>Мана:</strong> Начинается с 1, растет на +1 каждый раунд (макс. 10). Восполняется в начале хода.</p>
+          <p>• <strong>Щит:</strong> Поглощает входящий урон перед здоровьем.</p>
+          <h4>Особые эффекты:</h4>
+          <p>• <strong>Чистый урон:</strong> Бьет напрямую по здоровью, игнорируя щит.</p>
+          <p>• <strong>Яд:</strong> Наносит урон в начале каждого хода жертвы.</p>
+          <p>• <strong>Отражение:</strong> Наносит ответный урон атакующему.</p>
+          <p>• <strong>Управление:</strong> Тапните по карте или перетащите ее на поле боя для розыгрыша.</p>
+        </div>
+        <button id="closeRulesBtn" class="btn-primary">Понятно</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно завершения матча -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2 id="gameOverTitle" class="modal-title">ИТОГ МАТЧА</h2>
+        <p id="gameOverDesc" class="modal-desc"></p>
+        <button id="restartMatchBtn" class="btn-primary">Сыграть снова</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Главный скрипт игры -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
