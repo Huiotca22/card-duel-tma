@@ -4,9 +4,9 @@
  * Не имеет зависимостей от DOM или Canvas, поддерживает запуск в Node.js и браузере.
  */
 
-const { CONSTANTS, CARD_TYPES, CARDS, CARD_MAP, createDefaultDeck } = require('./game_rules.js');
+import { CONSTANTS, CARD_TYPES, CARDS, CARD_MAP, createDefaultDeck } from './game_rules.js';
 
-class CardGameEngine {
+export class CardGameEngine {
   /**
    * @param {Object} [options]
    * @param {string} [options.playerName='Игрок']
@@ -203,7 +203,7 @@ class CardGameEngine {
       enemy.hp = Math.max(0, enemy.hp - unabsorbed);
 
       effectSummary.damageDealt = finalDamage;
-      this._log(`${current.name} наносит ${finalDamage} урона карте ${card.name} (щит поглотил ${absorbed}, по здоровью ${unabsorbed})`);
+      this._log(`${current.name} наносит ${finalDamage} урона картой ${card.name} (щит поглотил ${absorbed}, по здоровью ${unabsorbed})`);
       this._emit('damage', {
         target: opponentKey,
         amount: finalDamage,
@@ -525,7 +525,7 @@ class CardGameEngine {
 
   /**
    * Возвращает чистый снимок состояния (удобно передавать в Canvas render loop).
-   * @param {string} [forPlayerKey='player'] Если указан, карты руки соперника скрываются (для честного тумана войны).
+   * @param {string} [forPlayerKey=null] Если указан, карты руки соперника скрываются (для честного тумана войны).
    */
   getState(forPlayerKey = null) {
     const formatPlayer = (p, isSelf) => ({
@@ -556,10 +556,4 @@ class CardGameEngine {
   }
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { CardGameEngine };
-}
-
-if (typeof window !== 'undefined') {
-  window.CardGameEngine = CardGameEngine;
-}
+export default CardGameEngine;

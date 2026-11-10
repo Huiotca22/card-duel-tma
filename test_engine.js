@@ -3,8 +3,8 @@
  * Автоматические тесты механик карточного движка.
  */
 
-const { CardGameEngine } = require('./engine.js');
-const { CARD_MAP } = require('./game_rules.js');
+import { CardGameEngine } from './engine.js';
+import { CARD_MAP } from './game_rules.js';
 
 function assert(condition, message) {
   if (!condition) {
@@ -32,7 +32,6 @@ function runTests() {
   assert(state1.opponent.hand.length === 4, 'У соперника в руке 4 карты');
 
   // Тест 2: Розыгрыш карты со щитом и проверка нехватки маны
-  // Принудительно заменим карты в руке для детерминированного теста
   game.players.player.hand = [
     { ...CARD_MAP.block, uid: 'b1' },
     { ...CARD_MAP.meteor, uid: 'm1' } // Стоит 5 маны, сейчас доступна 1
@@ -127,7 +126,7 @@ function runTests() {
   }
   assert(simGame.isGameOver === true, `Матч завершился победой ${simGame.winner} за ${roundsCount} полуходов`);
 
-  console.log('\n Все тесты успешно пройдены!');
+  console.log('\nВсе тесты успешно пройдены!');
 }
 
 runTests();
