@@ -5,6 +5,7 @@
  */
 
 import { CARD_TYPES } from './game_rules.js';
+import { drawCardArt, drawCardBack, drawPlayerAvatar, drawOpponentAvatar } from './textures.js';
 
 export class CanvasRenderer {
   constructor(canvas, particleSystem) {
@@ -245,16 +246,8 @@ export class CanvasRenderer {
       ctx.stroke();
     }
 
-    ctx.fillStyle = '#2c2c2e';
-    ctx.beginPath();
-    ctx.arc(avatarX, avatarY, 20, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#ff9500';
-    ctx.font = 'bold 16px -apple-system, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('В', avatarX, avatarY);
+    // Процедурный аватар темного владыки
+    drawOpponentAvatar(ctx, avatarX, avatarY, 20);
     ctx.restore();
 
     // 2. Имя соперника
@@ -323,27 +316,7 @@ export class CanvasRenderer {
   }
 
   _drawCardBack(x, y, w, h) {
-    const ctx = this.ctx;
-    // Корпус
-    ctx.fillStyle = '#1c1f2e';
-    this._roundRect(ctx, x, y, w, h, 6);
-    ctx.fill();
-
-    // Рамка
-    ctx.strokeStyle = '#4e6eb4';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Внутренний ромб / узор
-    ctx.strokeStyle = 'rgba(78, 110, 180, 0.4)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y + 6);
-    ctx.lineTo(x + w - 6, y + h / 2);
-    ctx.lineTo(x + w / 2, y + h - 6);
-    ctx.lineTo(x + 6, y + h / 2);
-    ctx.closePath();
-    ctx.stroke();
+    drawCardBack(this.ctx, x, y, w, h);
   }
 
   // -------------------------------------------------------------------
@@ -529,16 +502,8 @@ export class CanvasRenderer {
       ctx.stroke();
     }
 
-    ctx.fillStyle = '#1c2438';
-    ctx.beginPath();
-    ctx.arc(avatarX, avatarY, 20, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#34c759';
-    ctx.font = 'bold 16px -apple-system, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(player.name.slice(0, 1).toUpperCase(), avatarX, avatarY);
+    // Процедурный аватар рыцаря-героя
+    drawPlayerAvatar(ctx, avatarX, avatarY, 20);
     ctx.restore();
 
     // 2. Имя игрока
@@ -888,8 +853,8 @@ export class CanvasRenderer {
     ctx.textBaseline = 'middle';
     ctx.fillText(card.name, x + 28, y + 14);
 
-    // 6. Иконка-иллюстрация в центре карты
-    this._drawCardGlyph(card, x + w / 2, y + 54);
+    // 6. Процедурный кастомный арт в центре карты с виньеткой
+    this._drawCardIllustration(card, x, y, w, h, theme);
 
     // 7. Плашка ключевого свойства (Урон, Щит, Лечение)
     this._drawCardStatPill(card, x + w / 2, y + 84);
@@ -911,31 +876,64 @@ export class CanvasRenderer {
     ctx.restore();
   }
 
-  _drawCardGlyph(card, cx, cy) {
+  _drawCardIllustration(card, x, y, w, h, theme) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.font = '22px -apple-system, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
 
-    let icon = '⚔️';
-    if (card.id === 'strike') icon = '🗡️';
-    else if (card.id === 'fireball') icon = '🔥';
-    else if (card.id === 'meteor') icon = '☄️';
-    else if (card.id === 'quick_slash') icon = '⚡';
-    else if (card.id === 'piercing_strike') icon = '🎯';
-    else if (card.id === 'block') icon = '🛡️';
-    else if (card.id === 'heavy_shield') icon = '🏰';
-    else if (card.id === 'mirror_shield') icon = '🪞';
-    else if (card.id === 'heal') icon = '💚';
-    else if (card.id === 'meditation') icon = '🧘';
-    else if (card.id === 'poison_dart') icon = '🧪';
-    else if (card.id === 'vampirism') icon = '🩸';
-    else if (card.id === 'fury') icon = '💥';
-    else if (card.id === 'second_wind') icon = '🪽';
+    // Габариты и положение рамки иллюстрации
+    const artW = Math.round(w - 12);
+    const artH = Math.round(Math.min(52, h * 0.36));
+    const artX = x + Math.round((w - artW) / 2);
+    const artY = y + 26;
 
-    ctx.fillText(icon, cx, cy);
+    // Скругленная рамка с клипом для арта
+    this._roundRect(ctx, artX, artY, artW, artH, 5);
+    ctx.clip();
+
+    // Фоновая атмосферная виньетка
+    const bgGrad = ctx.createRadialGradient(
+      artX + artW / 2,
+      artY + artH / 2,
+      2,
+      artX + artW / 2,
+      artY + artH / 2,
+      Math.max(artW, artH) * 0.7
+    );
+    bgGrad.addColorStop(0, '#1c2230');
+    bgGrad.addColorStop(0.7, '#0f131c');
+    bgGrad.addColorStop(1, '#07090e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(artX, artY, artW, artH);
+
+    // Цветной мягкий отблеск стихии карты
+    const typeGlow = ctx.createRadialGradient(
+      artX + artW / 2,
+      artY + artH / 2,
+      0,
+      artX + artW / 2,
+      artY + artH / 2,
+      artH * 0.8
+    );
+    typeGlow.addColorStop(0, theme.gradStart + '33');
+    typeGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = typeGlow;
+    ctx.fillRect(artX, artY, artW, artH);
+
+    // Отрисовка высококачественного процедурного арта
+    const artSize = Math.round(artH * 0.84);
+    drawCardArt(ctx, card.id, artX + artW / 2, artY + artH / 2, artSize);
+
+    // Тонкая внутренняя рамка окна арта
+    ctx.strokeStyle = theme.border + '66';
+    ctx.lineWidth = 1;
+    this._roundRect(ctx, artX + 0.5, artY + 0.5, artW - 1, artH - 1, 5);
+    ctx.stroke();
+
     ctx.restore();
+  }
+
+  _drawCardGlyph(card, cx, cy) {
+    drawCardArt(this.ctx, card.id, cx, cy, 38);
   }
 
   _drawCardStatPill(card, cx, cy) {
